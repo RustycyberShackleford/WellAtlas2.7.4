@@ -1,0 +1,19 @@
+<!doctype html><html><head>
+<title>{{ header_title }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+</head><body>
+<header><h1 id="appTitle">{{ header_title }}</h1>
+<form id="searchForm"><input id="searchInput" placeholder="Search">
+<select id="jobFilter"><option value="">All Jobs</option><option>Domestic</option><option>Drilling</option><option>Ag</option><option>Electrical</option></select>
+<button type="button" onclick="refreshSites()">Search</button></form></header>
+<div id="map" style="height:600px;"></div>
+<script>
+var map=L.map('map').setView([39.9,-122.0],9);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+async function refreshSites(){const q=document.getElementById('searchInput').value;const job=document.getElementById('jobFilter').value;
+const resp=await fetch(`/api/sites?q=${encodeURIComponent(q)}&job=${encodeURIComponent(job)}`);const data=await resp.json();
+data.forEach(s=>{if(s.latitude&&s.longitude){L.marker([s.latitude,s.longitude]).addTo(map).bindPopup(`${s.customer} - ${s.name} (#${s.job_number}) [${s.job_category}]`);}});
+if(data.length>0){var group=L.featureGroup(data.map(s=>L.marker([s.latitude,s.longitude])));map.fitBounds(group.getBounds().pad(0.2));}}refreshSites();
+</script></body></html>

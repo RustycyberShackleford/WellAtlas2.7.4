@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Customer: {{ customer.name }}</h2>
+
+<div class="toolbar">
+  <a class="btn" href="{{ url_for('index') }}?add_site={{ customer.id }}">➕ Add Site via Map</a>
+</div>
+
+<h3>Sites</h3>
+<ul class="list">
+  {% for s in sites %}
+    <li>
+      <a href="{{ url_for('site_detail', sid=s.id) }}">{{ s.name }}</a>
+      <form method="post" action="{{ url_for('delete_site', sid=s.id) }}" class="inline">
+        <button class="btn danger" onclick="return confirm('Delete site and its jobs?')">Delete</button>
+      </form>
+    </li>
+  {% else %}
+    <li class="muted">No sites yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

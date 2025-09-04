@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}WellAtlas 2.6{% endblock %}</title>
+
+  <!-- 2.0 cleaner look, minimal chrome -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<header class="site-header">
+  <div class="brand">
+    <a href="{{ url_for('index') }}">WellAtlas</a>
+  </div>
+  <nav class="nav">
+    <a href="{{ url_for('index') }}">Map</a>
+    <a href="{{ url_for('customers') }}">Customers</a>
+    <a href="{{ url_for('deleted_items') }}">Deleted</a>
+  </nav>
+</header>
+
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for cat, msg in messages %}
+          <li class="{{ cat }}">{{ msg }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  <small>© 2025 WellAtlas</small>
+</footer>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

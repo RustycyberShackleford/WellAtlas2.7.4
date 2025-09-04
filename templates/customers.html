@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <h2>Customers</h2>
+</div>
+
+<form method="post" action="{{ url_for('new_customer') }}" class="card">
+  <label>New customer name</label>
+  <input name="name" placeholder="Acme Ranch">
+  <button class="btn">Add Customer</button>
+</form>
+
+<ul class="list">
+  {% for c in customers %}
+    <li class="row">
+      <form method="post" action="{{ url_for('edit_customer', cid=c.id) }}" class="inline">
+        <input name="name" value="{{ c.name }}" class="grow">
+        <button class="btn">Save</button>
+      </form>
+      <a class="btn" href="{{ url_for('customer_detail', cid=c.id) }}">Open</a>
+      <a class="btn" href="{{ url_for('index') }}?add_site={{ c.id }}">Add Site (map)</a>
+      <form method="post" action="{{ url_for('delete_customer', cid=c.id) }}" class="inline">
+        <button class="btn danger" onclick="return confirm('Delete customer and all sites/jobs?')">Delete</button>
+      </form>
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

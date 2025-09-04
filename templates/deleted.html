@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Deleted items</h2>
+
+<h3>Customers</h3>
+<ul class="list">
+  {% for c in customers %}
+    <li>
+      {{ c.name }}
+      <form method="post" action="{{ url_for('restore_item', kind='customer', item_id=c.id) }}" class="inline"><button class="btn">Restore</button></form>
+      <form method="post" action="{{ url_for('purge_item', kind='customer', item_id=c.id) }}" class="inline"><button class="btn danger" onclick="return confirm('Permanently delete?')">Delete permanently</button></form>
+    </li>
+  {% else %}
+    <li class="muted">None</li>
+  {% endfor %}
+</ul>
+
+<h3>Sites</h3>
+<ul class="list">
+  {% for s in sites %}
+    <li>
+      {{ s.name }} ({{ s.customer.name if s.customer else 'no customer' }})
+      <form method="post" action="{{ url_for('restore_item', kind='site', item_id=s.id) }}" class="inline"><button class="btn">Restore</button></form>
+      <form method="post" action="{{ url_for('purge_item', kind='site', item_id=s.id) }}" class="inline"><button class="btn danger" onclick="return confirm('Permanently delete?')">Delete permanently</button></form>
+    </li>
+  {% else %}
+    <li class="muted">None</li>
+  {% endfor %}
+</ul>
+
+<h3>Jobs</h3>
+<ul class="list">
+  {% for j in jobs %}
+    <li>
+      {{ j.job_number }} ({{ j.category }}) at {{ j.site.name if j.site else 'no site' }}
+      <form method="post" action="{{ url_for('restore_item', kind='job', item_id=j.id) }}" class="inline"><button class="btn">Restore</button></form>
+      <form method="post" action="{{ url_for('purge_item', kind='job', item_id=j.id) }}" class="inline"><button class="btn danger" onclick="return confirm('Permanently delete?')">Delete permanently</button></form>
+    </li>
+  {% else %}
+    <li class="muted">None</li>
+  {% endfor %}
+</ul>
+{% endblock %}

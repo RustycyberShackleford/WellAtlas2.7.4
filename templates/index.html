@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Sites Map</h2>
+
+<div class="toolbar">
+  <button id="nearMe">Find Sites Near Me</button>
+  <span id="nearMeStatus" class="muted"></span>
+</div>
+
+<div class="toolbar">
+  <label class="muted">Filter by job category:</label>
+  <label><input type="checkbox" class="cat" value="Domestic" checked> Domestic</label>
+  <label><input type="checkbox" class="cat" value="Ag" checked> Ag</label>
+  <label><input type="checkbox" class="cat" value="Drilling" checked> Drilling</label>
+  <label><input type="checkbox" class="cat" value="Electrical" checked> Electrical</label>
+</div>
+
+{% if add_site_customer_id %}
+<div class="notice">
+  <strong>Add Site Mode:</strong> Click anywhere on the map to place the new site for this customer.
+  <div class="row" style="margin-top:6px">
+    <label>Site name</label> <input id="siteName" placeholder="New Site">
+  </div>
+</div>
+{% endif %}
+
+<div id="map" style="height: 70vh; border: 1px solid #ccc; border-radius: 8px;"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  var map = L.map('map').setView([39.73, -121.99], 9);
+
+  {% if MAPTILER_KEY %}
+  L.tileLayer("https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key={{ MAPTILER_KEY }}", {
+    tileSize: 512, zoomOffset: -1, maxZoom: 20,
+    attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a>'
+  }).addTo(map);
+  {% else %}
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+  {% endif %}
+
+  const allSites = {{ sites|tojson }};
+  let markers = [];
+
+  function clearMarkers(){
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
+  }
+
+  function renderMarkers(){
+    clearMarkers();
+    const checked = Array.from(document.querySelectorAll('.cat:checked')).map(i=>i.value);
+    allSites.forEach(s => {
+      if (!s.categories || s.categories.some(c => checked.includes(c))) {
+        const html = `
+          <div><b>${s.customer}</b><br>${s.name}</div>
+          <div style="margin-top:6px">
+            <a class="btn" href="/sites/${s.id}">View Site</a>
+            <a class="btn" href="/sites/${s.id}#jobs">View Jobs</a>
+          </div>`;
+        const m = L.marker([s.lat, s.lng]).addTo(map).bindPopup(html);
+        markers.push(m);
+      }
+    });
+  }
+  renderMarkers();
+
+  document.querySelectorAll('.cat').forEach(cb => {
+    cb.addEventListener('change', renderMarkers);
+  });
+
+  // Near me
+  let youMarker, youCircle;
+  function markYou(lat, lng, acc){
+    if (youMarker){ map.removeLayer(youMarker); }
+    if (youCircle){ map.removeLayer(youCircle); }
+    youMarker = L.circleMarker([lat,lng], {radius:6, weight:2}).addTo(map).bindPopup("You are here");
+    if (acc && acc>0){ youCircle = L.circle([lat,lng], {radius: acc}).addTo(map); }
+  }
+
+  document.getElementById("nearMe").onclick = () => {
+    const status = document.getElementById("nearMeStatus");
+    status.textContent = "Locating…";
+    if (!navigator.geolocation){
+      status.textContent = "Geolocation not supported."; return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const {latitude, longitude, accuracy} = pos.coords;
+        status.textContent = `Centered on you`;
+        map.setView([latitude, longitude], 13);
+        markYou(latitude, longitude, accuracy);
+      },
+      (err) => { status.textContent = "Location permission denied."; },
+      {enableHighAccuracy:true, timeout:8000}
+    );
+  };
+
+  // --- Add Site via Map (2.0 style): if ?add_site=<cid> is present ---
+  const addSiteCustomerId = {{ add_site_customer_id or 'null' }};
+  let addSiteMarker = null;
+  if (addSiteCustomerId){
+    map.getContainer().classList.add("adding-site");
+    map.once('click', async (e) => {
+      // place a temp marker
+      if (addSiteMarker){ map.removeLayer(addSiteMarker); }
+      addSiteMarker = L.marker(e.latlng).addTo(map).bindPopup("New site here").openPopup();
+
+      const nameInput = document.getElementById('siteName');
+      const siteName = nameInput && nameInput.value.trim() ? nameInput.value.trim() : "New Site";
+
+      try{
+        const resp = await fetch("/sites/create_at", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({
+            customer_id: addSiteCustomerId,
+            name: siteName,
+            lat: e.latlng.lat,
+            lng: e.latlng.lng
+          })
+        });
+        const js = await resp.json();
+        if (js.ok){
+          window.location.assign(`/customers/${js.customer_id}`);
+        }else{
+          alert(js.error || "Failed to create site");
+        }
+      }catch(err){
+        alert("Failed to create site");
+      }
+    });
+  }
+</script>
+{% endblock %}

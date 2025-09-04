@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Job: {{ job.job_number }}</h2>
+<p class="muted">Category: {{ job.category }} · Status: {{ job.status }}</p>
+<p>Site: <a href="{{ url_for('site_detail', sid=job.site.id) }}">{{ job.site.name }}</a></p>
+{% endblock %}

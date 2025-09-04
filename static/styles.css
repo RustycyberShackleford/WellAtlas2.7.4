@@ -1,0 +1,33 @@
+:root{
+  --bg:#0b1220; --text:#e6edf7; --muted:#9fb0c7;
+  --card:#0f1627; --line:#18223a; --btn:#1a2a4a; --btn2:#2a3b5d;
+  --danger:#8e1e1e; --ok:#165f31;
+}
+*{ box-sizing:border-box }
+body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); }
+a{ color:#aad1ff; text-decoration:none } a:hover{text-decoration:underline}
+.site-header{ display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--line); background:#0b1220; position:sticky; top:0; z-index:2; }
+.brand a{ color:#fff; font-weight:700; letter-spacing:.3px }
+.nav a{ margin-left:12px; }
+.container{ max-width:1000px; margin:16px auto; padding:0 14px; }
+h2{ margin:8px 0 12px; font-weight:650; }
+h3{ margin:12px 0 8px; font-weight:600; }
+.muted{ color:var(--muted) }
+.list{ list-style:none; padding-left:0; }
+.list li{ padding:6px 0; border-bottom:1px dashed var(--line); }
+.card{ background:var(--card); border:1px solid var(--line); padding:10px; border-radius:8px; margin:10px 0; }
+label{ display:block; margin-top:8px; font-size:14px; color:var(--muted) }
+input, select{ padding:8px; margin-top:4px; background:#0e1526; border:1px solid var(--line); color:var(--text); border-radius:6px; }
+input.grow{ width:260px }
+.btn{ display:inline-block; padding:6px 10px; border:1px solid var(--line); border-radius:6px; color:#e5e7eb; background:var(--btn); cursor:pointer; }
+.btn:hover{ background:var(--btn2) }
+.btn.danger{ border-color:#5e2a2a; background:#2a1616; color:#fff }
+.flashes{ list-style:none; padding-left:0; }
+.flashes li{ padding:6px 10px; margin:6px 0; border-radius:6px; }
+.flashes li.ok{ background:#0e2a17; border:1px solid #1d5c2f }
+.flashes li.error{ background:#2a0e0e; border:1px solid #5c1d1d }
+.toolbar{ margin:10px 0 }
+.notice{ background:#102238; border:1px solid #1a365e; padding:8px 10px; border-radius:8px; margin:10px 0; }
+#map{ background:#0b1224; border:1px solid var(--line); border-radius:8px }
+.row{ display:flex; gap:8px; align-items:center }
+.inline{ display:inline }

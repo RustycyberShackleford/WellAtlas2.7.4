@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+  <title>{{ header_title }}</title>
+</head>
+<body>
+  <header>
+    <h1>{{ header_title }}</h1>
+    <form id="searchForm">
+      <input id="searchInput" placeholder="Search sites">
+      <select id="jobFilter">
+        <option value="">All Jobs</option>
+        <option>Domestic</option>
+        <option>Drilling</option>
+        <option>Ag</option>
+        <option>Electrical</option>
+      </select>
+      <button type="button" onclick="refreshSites()">Search</button>
+    </form>
+  </header>
+  <aside>
+    <form action="{{ url_for('create_site') }}" method="post">
+      <label>Customer</label><input name="customer">
+      <label>Site Name</label><input name="name">
+      <label>Job #</label>
+      <select name="job_category">
+        <option>Domestic</option>
+        <option>Drilling</option>
+        <option>Ag</option>
+        <option>Electrical</option>
+      </select>
+      <label>Description</label><textarea name="description"></textarea>
+      <label>Latitude</label><input name="latitude" id="latField">
+      <label>Longitude</label><input name="longitude" id="lonField">
+      <button type="submit">Create</button>
+    </form>
+  </aside>
+  <section>
+    <ul id="siteList"></ul>
+  </section>
+  <script>
+    async function refreshSites(){
+      const q=document.getElementById('searchInput').value;
+      const job=document.getElementById('jobFilter').value;
+      const resp=await fetch(`/api/sites?q=${encodeURIComponent(q)}&job=${encodeURIComponent(job)}`);
+      const data=await resp.json();
+      const list=document.getElementById('siteList');
+      list.innerHTML="";
+      data.forEach(s=>{
+        const li=document.createElement('li');
+        li.textContent=`${s.customer||''} - ${s.name||''} (${s.job_category||''})`;
+        list.appendChild(li);
+      });
+    }
+    document.getElementById('jobFilter').addEventListener('change',refreshSites);
+    refreshSites();
+  </script>
+</body>
+</html>
